@@ -1,3 +1,6 @@
+#ifndef STR_H
+#define STR_H
+
 #include <unistd.h>
 #include <stdlib.h>
 
@@ -6,7 +9,7 @@
 struct str {
 	char* string;
 	size_t position;
-	size_t length;
+	int length;
 	size_t bufsize;
 };
 
@@ -21,6 +24,8 @@ struct str {
 		(l)->length++;\
 	} while(0)
 
-char* get_string(struct str* s);
+void print_str(struct str* s);
 struct str* new_str(void);
 void free_str(struct str* s);
+
+#endif // !STR_H

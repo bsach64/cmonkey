@@ -1,3 +1,6 @@
+#ifndef LEXER_H
+#define LEXER_H
+
 #include <unistd.h>
 #include <stdlib.h>
 
@@ -10,3 +13,5 @@ struct lexer {
 
 struct lexer* new_lexer(struct str* input);
 void read_char(struct lexer* l);
+
+#endif

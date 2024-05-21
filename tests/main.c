@@ -1,10 +1,14 @@
-#include <stdio.h>
 #include "str.h"
 
 void test_str()
 {
 	struct str* s = new_str();
-	printf("%zu\n", s->length);
+	str_append(s, 'a');
+	str_append(s, 'b');
+	str_append(s, 'b');
+	str_append(s, 'b');
+	print_str(s);
+	free_str(s);
 }
 
 int main(void)

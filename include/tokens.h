@@ -1,3 +1,6 @@
+#ifndef TOKENS_H
+#define TOKENS_H
+
 #include "str.h"
 
 enum token_type {
@@ -26,3 +29,5 @@ struct token {
 	enum token_type type;
 	struct str* literal;
 };
+
+#endif // !TOKENS_H

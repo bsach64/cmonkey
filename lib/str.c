@@ -24,17 +24,7 @@ void free_str(struct str* s)
 	free(s);
 }
 
-char* get_string(struct str* s)
+void print_str(struct str* s)
 {
-	str_append(s, '\0');
-	char* string = (char*) malloc(sizeof(s->length));
-	if (string == NULL)
-		goto err;
-
-	memcpy(s->string, string, s->length);
-	return string;
-
-err:
-	printf("ERROR: Could not allocate memory\n");
-	exit(1);
+	printf("%.*s\n", s->length, s->string);
 }
