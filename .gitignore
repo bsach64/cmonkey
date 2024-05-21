@@ -1,0 +1,9 @@
+test
+cmonkey
+
+lib/*.o
+lib/*.d
+tests/*.o
+tests/*.d
+*.o
+*.d
