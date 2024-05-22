@@ -1,17 +1,18 @@
-#include "str.h"
+#include "arena.h"
+#include <assert.h>
 
-void test_str()
+void test_arena()
 {
-	struct str* s = new_str();
-	str_append(s, 'a');
-	str_append(s, 'b');
-	str_append(s, 'b');
-	str_append(s, 'b');
-	print_str(s);
-	free_str(s);
+	Arena* arena = arena_init();
+	assert(arena->buf_len == 0);
+	arena_alloc(arena, 1);
+	assert(arena->buf_len == 1);
+	arena_alloc(arena, 1);
+	assert(arena->buf_len == 2);
+	arena_destroy(arena);
 }
 
 int main(void)
 {
-	test_str();
+
 }

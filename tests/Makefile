@@ -1,8 +1,8 @@
 # This is can be made much better
-BINARY=cmonkey
-LIBDIRS=./lib/
-CODEDIRS=.
-INCDIRS=. ./include/
+TEST=test
+LIBDIRS=../lib/
+INCDIRS=. ../include/
+TESTDIRS=.
 
 CC=clang
 OPT=-O0
@@ -10,22 +10,22 @@ OPT=-O0
 DEPFLAGS=-MP -MD
 CFLAGS=-Wall -Wextra -g $(foreach D,$(INCDIRS), -I$(D)) $(OPT) $(DEPFLAGS)
 
-CODEFILES=$(foreach D, $(CODEDIRS), $(wildcard $(D)/*.c))
 LIBFILES=$(foreach D, $(LIBDIRS), $(wildcard $(D)/*.c))
+TESTFILES=$(foreach D, $(TESTDIRS), $(wildcard $(D)/*.c))
 
-CFILES=$(CODEFILES) $(LIBFILES)
+CTESTFILES=$(TESTFILES) $(LIBFILES)
 
 # pattern substitution
-OBJECTS=$(patsubst %.c, %.o, $(CFILES))
-DEPFILES=$(patsubst %.c, %.d, $(CFILES))
+TESTOBJECTS=$(patsubst %.c, %.o, $(CTESTFILES))
+TESTDEPFILES=$(patsubst %.c, %.d, $(CTESTFILES))
 
-all: $(BINARY)
+all: $(TEST)
 
-$(BINARY): $(OBJECTS)
+$(TEST): $(TESTOBJECTS)
 	$(CC) -o $@ $^
 
 %.o:%.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 clean:
-	rm -rf $(BINARY) $(OBJECTS) $(DEPFILES)
+	rm -rf $(TEST) $(TESTOBJECTS) $(TESTDEPFILES)

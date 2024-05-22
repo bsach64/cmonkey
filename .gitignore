@@ -7,3 +7,6 @@ tests/*.o
 tests/*.d
 *.o
 *.d
+
+.cache/
+compile_commands.json
