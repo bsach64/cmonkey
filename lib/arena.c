@@ -2,7 +2,7 @@
 #include <string.h>
 #include "arena.h"
 
-Arena* arena_init()
+Arena* arena_init(void)
 {
 	Arena* arena = malloc(sizeof(Arena));
 	if (arena == NULL)
@@ -43,4 +43,19 @@ void arena_destroy(Arena* arena)
 {
 	free(arena->buf);
 	free(arena);
+}
+
+
+Temp_Arena_Memory temp_area_memory_begin(Arena* arena)
+{
+	Temp_Arena_Memory temp = {
+		.arena = arena,
+		.cur_offset = arena->cur_offset
+	};
+	return temp;
+}
+
+void temp_area_memory_end(Temp_Arena_Memory temp)
+{
+	temp.arena->cur_offset = temp.cur_offset;
 }

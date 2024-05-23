@@ -5,7 +5,7 @@
 #include "token.h"
 
 struct lexer {
-	str* input;
+	Str* input;
 	size_t position;
 	size_t read_position;
 	char ch;

@@ -5,7 +5,7 @@
 #include <string.h>
 #include <assert.h>
 
-void test_arena()
+void test_arena(void)
 {
 	Arena* arena = arena_init();
 	assert(arena->buf_len == 0);
@@ -16,12 +16,12 @@ void test_arena()
 	arena_destroy(arena);
 }
 
-void test_lexer()
+void test_lexer(void)
 {
 	const char* input = "=+(){},;";
 
 	struct expected {
-		token_type expected_type;
+		Token_Type expected_type;
 		const char* expected_literal;
 	};
 
@@ -46,11 +46,13 @@ void test_lexer()
 	print_arena_state(arena);
 	
 	for (size_t i = 0; i < length; i++) {
+		Temp_Arena_Memory temp = temp_area_memory_begin(arena);
 		struct token* tok = lexer_next_token(arena, l);
 		print_arena_state(arena);
 		print_token_type(tok);
 		assert(tok->type == tests[i].expected_type);
 		assert(strncmp(tok->literal->str, tests[i].expected_literal, tok->literal->size) == 0);
+		temp_area_memory_end(temp);
 	}
 	arena_destroy(arena);
 }

@@ -4,8 +4,8 @@
 
 struct lexer* lexer_init(Arena* lexer_arena, const char* input)
 {
-	struct lexer* l = arena_alloc(lexer_arena, sizeof(struct lexer));
-	l->input = arena_alloc(lexer_arena, sizeof(str));
+	struct lexer* l = arena_alloc(lexer_arena, sizeof(*l));
+	l->input = arena_alloc(lexer_arena, sizeof(*(l->input)));
 	l->input->size = strlen(input);
 	l->input->str = arena_alloc(lexer_arena, l->input->size);
 	memcpy(l->input->str, input, l->input->size);

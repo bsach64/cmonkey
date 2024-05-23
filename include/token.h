@@ -19,13 +19,13 @@ typedef enum {
 	RBRACE,
 	FUNCTION,
 	LET
-} token_type; 
+} Token_Type; 
 
 struct token {
-	token_type type;
-	str* literal;
+	Token_Type type;
+	Str* literal;
 };
 
-struct token* token_init(Arena* arena, const char* string, token_type tt);
+struct token* token_init(Arena* arena, const char* string, Token_Type tt);
 
 #endif // !TOKEN_H
