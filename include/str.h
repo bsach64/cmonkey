@@ -6,6 +6,6 @@
 typedef struct {
 	char* str;
 	size_t size;
-} string;
+} str;
 
 #endif // !STR_H

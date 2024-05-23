@@ -5,13 +5,13 @@
 Arena* arena_init()
 {
 	Arena* arena = malloc(sizeof(Arena));
-	if (!arena)
+	if (arena == NULL)
 		goto err;
 
 	arena->buf = NULL;
-
 	arena->buf_len = 0;
 	arena->cur_offset = 0;
+	return arena;
 err:
 	printf("ERROR: Could not allocate memory\n");
 	exit(1);
