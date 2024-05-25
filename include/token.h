@@ -7,7 +7,7 @@
 typedef enum {
 	MILLEGAL,
 	MEOF,
-	INDENT,
+	IDENT,
 	INT,
 	ASSIGN,
 	PLUS,
@@ -26,6 +26,6 @@ struct token {
 	Str* literal;
 };
 
-struct token* token_init(Arena* arena, const char* string, Token_Type tt);
+struct token* token_init(Arena* arena, Str* s, Token_Type tt);
 
 #endif // !TOKEN_H

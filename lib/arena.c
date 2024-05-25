@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include "types.h"
 #include "arena.h"
 
 Arena* arena_init(void)
@@ -17,7 +19,7 @@ err:
 	exit(1);
 }
 
-void* arena_alloc(Arena* arena, size_t size)
+void* arena_alloc(Arena* arena, u64 size)
 {
 	if (arena->buf_len < arena->cur_offset + size) {
 		if (arena->buf_len * 2 > arena->cur_offset + size)

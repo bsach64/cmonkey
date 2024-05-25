@@ -1,6 +1,7 @@
 #include "debug.h"
 #include "token.h"
 #include "arena.h"
+#include <stdio.h>
 
 
 #define TOKEN_TYPE(type, name) \
@@ -14,7 +15,7 @@ void print_token_type(struct token* tok)
 	{
 		TOKEN_TYPE(MILLEGAL, "MILLEGAL");
 		TOKEN_TYPE(MEOF, "MEOF");
-		TOKEN_TYPE(INDENT, "INDENT");
+		TOKEN_TYPE(IDENT, "INDENT");
 		TOKEN_TYPE(INT, "INT");
 		TOKEN_TYPE(ASSIGN, "ASSIGN");
 		TOKEN_TYPE(PLUS, "PLUS");
