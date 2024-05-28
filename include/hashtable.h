@@ -5,6 +5,8 @@
 #include "str.h"
 #include "types.h"
 
+#define LOAD_FACTOR (0.75)
+
 /*
 * insert: insert a (key, value)
 * search: given a key and return its value
@@ -12,25 +14,22 @@
 */
 
 typedef struct {
+	Str* key;
 	i32 value;
 	bool delete_me;
 	bool empty;
-
 } Hash_Table_Entry;
 
-
 typedef struct {
-	Arena* arena;
 	Hash_Table_Entry* entries;
-	u64 m;
+	u64 size;
+	u64 filled;
 } Hash_Table;
 
-u64 prehash(Str key);
-u64 hash(u64 prehashed_key);
-void insert(Hash_Table* hash_table, Str key, i32 value);
-bool delete(Hash_Table* hash_table, Str key);
-bool search(Hash_Table* hash_table, Str key);
-Hash_Table* hash_table_init(Arena* arena);
-void hash_table_print(Hash_Table* hash_table);
+Hash_Table* insert(Hash_Table* h, Str* key, i32 value);
+bool delete(Hash_Table* h, Str* key);
+bool search(Hash_Table* h, Str* key);
+Hash_Table* hash_table_init(u64 initial_size);
+void hash_table_destroy(Hash_Table* h);
 
-#endif  // INCLUDE_INCLUDE_HASHTABLE_H_
+#endif  // HASHTABLE_H

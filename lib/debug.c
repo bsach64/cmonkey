@@ -41,3 +41,14 @@ void print_arena_state(Arena* arena)
 {
 	printf("buf_len: %zu, cur_offset: %zu\n", arena->buf_len, arena->cur_offset);
 }
+
+void print_hash_table(Hash_Table* h)
+{
+	printf("{\n");
+	for (u64 i = 0; i < h->size; i++) {
+		if (!h->entries[i].empty) {
+			printf("\t\"%.*s\":%hhu\n", (int)h->entries[i].key->size, h->entries[i].key->str, h->entries[i].value);
+		}
+	}
+	printf("}\n");
+}

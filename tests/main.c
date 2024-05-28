@@ -1,9 +1,24 @@
 #include "arena.h"
+#include "hashtable.h"
+#include "str.h"
 #include "token.h"
 #include "lexer.h"
 #include "debug.h"
 #include <string.h>
 #include <assert.h>
+
+void test_hash_table(void)
+{
+	Arena* arena = arena_init();
+	Hash_Table* h = hash_table_init(1);
+	Str* s = str_from_cstr(arena, "hey");
+	h = insert(h, s, 2);
+	Str* x = str_from_cstr(arena, "bhee");
+	h = insert(h, x, 4);
+	print_hash_table(h);
+	arena_destroy(arena);
+	hash_table_destroy(h);
+}
 
 void test_arena(void)
 {
@@ -134,4 +149,5 @@ int main(void)
 {
 	test_arena();
 	test_lexer_simple();
+	test_hash_table();
 }
