@@ -9,7 +9,7 @@ typedef struct {
 	u64 cur_offset;
 } Arena;
 
-Arena* arena_init(void);
+Arena* arena_init(u64 initial_size);
 void* arena_alloc(Arena* arena, u64 size);
 void arena_destroy(Arena* arena);
 

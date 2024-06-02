@@ -1,27 +1,30 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "hashtable.h"
-#include "debug.h"
 #include "types.h"
+#include "hashtable.h"
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
 
-static u64 hash(Str key)
+static u64 hash(const char* key, u64 size)
 {
 	u32 hash = 2166136261u;
-	for (u64 i = 0; i < key.size; i++) {
-		hash ^= (u8)key.str[i];
+	for (u64 i = 0; i < size; i++) {
+		hash ^= (u8)key[i];
 		hash *= 16777619;
 	}
 	return (u64)hash;
 }
 
-static Hash_Table* hash_table_copy(Hash_Table* h, u64 new_size)
+static Hash_Table* hash_table_rebuild(Hash_Table* h, u64 new_size)
 {
 	Hash_Table* new_h = hash_table_init(new_size);
 	for (u64 i = 0; i < h->size; i++) {
-		if (h->entries[i].empty)
+		if (h->entries[i].empty || h->entries[i].delete_me)
 			continue;
-		insert(new_h, h->entries[i].key, h->entries[i].value);
+		new_h = hash_table_insert(new_h, h->entries[i].key->str, h->entries[i].value);
 	}
+	hash_table_destroy(h);
 	return new_h;
 }
 
@@ -47,26 +50,97 @@ malloc_fail:
 	exit(EXIT_FAILURE);
 }
 
-Hash_Table* insert(Hash_Table* h, Str* key, i32 value)
+void hash_table_destroy(Hash_Table* h)
 {
-	if ((h->filled /(double) h->size) > LOAD_FACTOR) {
-		Hash_Table* new_h = hash_table_copy(h, h->size * 2);
-		h = new_h;
+	for (u64 i = 0; i < h->size; i++) {
+		if (h->entries[i].empty)
+			continue;
+		free(h->entries[i].key->str);
+		free(h->entries[i].key);
 	}
+	free(h->entries);
+	free(h);
+}
+
+Hash_Table* hash_table_insert(Hash_Table* h, const char* key, i32 value)
+{
+	u64 length = strlen(key);
+	char* ckey = malloc(length + 1);
+	memcpy(ckey, key, length + 1);
+
 	h->filled += 1;
-	u64 i = hash(*key) % h->size;
-	while (!h->entries[i].empty || !h->entries[i].delete_me)
+	u64 i = hash(ckey, length) % h->size;
+	while(!h->entries[i].empty || !h->entries[i].delete_me) {
+		if (h->entries[i].key->size == length && strncmp(h->entries[i].key->str, ckey, length) == 0) {
+			h->entries[i].value = value;
+			free(ckey);
+			return h;
+		}
 		i = (i + 1) % h->size;
-	h->entries[i].key = key;
+	}
+	h->entries[i].value = value;
 	h->entries[i].empty = false;
 	h->entries[i].delete_me = false;
-	h->entries[i].value = value;
+
+	h->entries[i].key = malloc(sizeof(*(h->entries[i].key)));
+	h->entries[i].key->size = length;
+	h->entries[i].key->str = ckey;
+	
+	if ((h->filled / (double) h->size) > LOAD_FACTOR) {
+		Hash_Table* new_h = hash_table_rebuild(h, h->size * 2);
+		h = new_h;
+	}
+	
 	return h;
 }
 
-void hash_table_destroy(Hash_Table* h)
+Hash_Table* hash_table_delete(Hash_Table* h, const char* key)
 {
-	// memory used by keys should be freed separately
-	free(h->entries);
-	free(h);
+	u64 key_len = strlen(key);
+	u64 i = hash(key, key_len) % h->size;
+	
+	while(!h->entries[i].empty) {
+		if (!h->entries[i].delete_me && h->entries[i].key->size == key_len
+			&& strncmp(h->entries[i].key->str, key, key_len) == 0) {
+			h->entries[i].delete_me = true;
+			h->filled -= 1;
+			break;
+		}
+		i = (i + 1) % h->size;
+	}
+
+	if (h->filled > 0 && h->filled / (double) h->size <= (double) 0.2500) {
+		h = hash_table_rebuild(h, h->size / 2);
+	}
+	return h;
+}
+
+bool hash_table_search(Hash_Table* h, const char* key)
+{
+	u64 key_len = strlen(key);
+	u64 i = hash(key, key_len) % h->size;
+	
+	while(!h->entries[i].empty) {
+		if (!h->entries[i].delete_me && h->entries[i].key->size == key_len
+			&& strncmp(h->entries[i].key->str, key, key_len) == 0) {
+			return true;
+		}
+		i = (i + 1) % h->size;
+	}
+	return false;
+}
+
+i32 hash_table_get(Hash_Table* h, const char* key)
+{
+	u64 key_len = strlen(key);
+	u64 i = hash(key, key_len) % h->size;
+	
+	while(!h->entries[i].empty) {
+		if (!h->entries[i].delete_me && h->entries[i].key->size == key_len
+			&& strncmp(h->entries[i].key->str, key, key_len) == 0) {
+			return h->entries[i].value;
+		}
+		i = (i + 1) % h->size;
+	}
+	return 0;
 }

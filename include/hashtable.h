@@ -2,16 +2,10 @@
 #define HASHTABLE_H
 
 #include <stdbool.h>
-#include "str.h"
 #include "types.h"
+#include "str.h"
 
 #define LOAD_FACTOR (0.75)
-
-/*
-* insert: insert a (key, value)
-* search: given a key and return its value
-* delete: given a key delete its value
-*/
 
 typedef struct {
 	Str* key;
@@ -26,9 +20,10 @@ typedef struct {
 	u64 filled;
 } Hash_Table;
 
-Hash_Table* insert(Hash_Table* h, Str* key, i32 value);
-bool delete(Hash_Table* h, Str* key);
-bool search(Hash_Table* h, Str* key);
+Hash_Table* hash_table_insert(Hash_Table* h, const char* key, i32 value);
+Hash_Table* hash_table_delete(Hash_Table* h, const char* key);
+bool hash_table_search(Hash_Table* h, const char* key);
+i32 hash_table_get(Hash_Table* h, const char* key);
 Hash_Table* hash_table_init(u64 initial_size);
 void hash_table_destroy(Hash_Table* h);
 

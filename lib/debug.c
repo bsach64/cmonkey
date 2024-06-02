@@ -1,4 +1,5 @@
 #include "debug.h"
+#include "hashtable.h"
 #include "token.h"
 #include "arena.h"
 #include <stdio.h>
@@ -42,13 +43,38 @@ void print_arena_state(Arena* arena)
 	printf("buf_len: %zu, cur_offset: %zu\n", arena->buf_len, arena->cur_offset);
 }
 
+void print_bool(bool x) {
+	if (x) {
+		printf("true");
+	} else {
+		printf("false");
+	}
+}
+
 void print_hash_table(Hash_Table* h)
 {
 	printf("{\n");
 	for (u64 i = 0; i < h->size; i++) {
-		if (!h->entries[i].empty) {
+		if (h->entries[i].empty == false || h->entries[i].delete_me == false) {
 			printf("\t\"%.*s\":%hhu\n", (int)h->entries[i].key->size, h->entries[i].key->str, h->entries[i].value);
 		}
+	}
+	printf("}\n");
+}
+
+void print_hash_table_debug(Hash_Table* h)
+{
+	printf("{\n");
+	for (u64 i = 0; i < h->size; i++) {
+		printf("\t{ ");
+		printf("delete_me: ");
+		print_bool(h->entries[i].delete_me);
+		printf(" empty: ");
+		print_bool(h->entries[i].empty);
+		if (h->entries[i].empty == false || h->entries[i].delete_me == false) {
+			printf(" \"%.*s\":%hhu", (int)h->entries[i].key->size, h->entries[i].key->str, h->entries[i].value);
+		}
+		printf(" }\n");
 	}
 	printf("}\n");
 }
