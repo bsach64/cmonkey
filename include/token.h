@@ -1,4 +1,3 @@
-#include "arena.h"
 #include "str.h"
 
 #ifndef TOKEN_H
@@ -26,6 +25,7 @@ struct token {
 	Str* literal;
 };
 
-struct token* token_init(Arena* arena, Str* s, Token_Type tt);
+struct token* token_init(Str* s, Token_Type tt);
+void token_destroy(struct token* t);
 
 #endif // !TOKEN_H

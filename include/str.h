@@ -9,5 +9,6 @@ typedef struct {
 } Str;
 
 Str* str_from_cstr(const char* string);
+Str* str_from_char(char ch);
 
 #endif // !STR_H

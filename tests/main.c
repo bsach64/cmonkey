@@ -1,12 +1,9 @@
-#include "arena.h"
 #include "hashtable.h"
 #include "str.h"
 #include "token.h"
 #include "lexer.h"
-#include "debug.h"
 #include <string.h>
 #include <assert.h>
-#include <stdio.h>
 
 void test_hash_table(void)
 {
@@ -40,61 +37,37 @@ void test_hash_table(void)
 	hash_table_destroy(h);
 }
 
-void test_arena(void)
-{
-	Arena* arena = arena_init(500);
-	assert(arena->buf_len == 500);
-	//
-	char* x = arena_alloc(arena, 100);
-	assert(arena->cur_offset == 99);
-	memset(x, 0, 100);
-
-	char* y = arena_alloc(arena, 400);
-	memset(y, 0, 400);
-
-	char* z = arena_alloc(arena, 2000);
-	assert(z == NULL);
-	arena_destroy(arena);
-}
-
 void test_lexer_simple(void)
 {
-	// const char* input = "=+(){},;";
-	// struct expected {
-	// 	Token_Type expected_type;
-	// 	const char* expected_literal;
-	// };
-	//
-	// struct expected tests[] = {
-	// 	{ASSIGN, "="},
-	// 	{PLUS, "+"},
-	// 	{LPAREN, "("},
-	// 	{RPAREN, ")"},
-	// 	{LBRACE, "{"},
-	// 	{RBRACE, "}"},
-	// 	{COMMA, ","},
-	// 	{SEMICOLON, ";"},
-	// 	{MEOF, "\0"},
-	// };
-	//
-	// u64 length = sizeof(tests) / sizeof(tests[0]);
-	//
-	// Arena* arena = arena_init();
-	// print_arena_state(arena);
-	// struct lexer* l = lexer_init(arena, input);
-	// print_lexer_state(l);
-	// print_arena_state(arena);
-	//
-	// for (u64 i = 0; i < length; i++) {
-	// 	Temp_Arena_Memory temp = temp_area_memory_begin(arena);
-	// 	struct token* tok = lexer_next_token(arena, l);
-	// 	print_arena_state(arena);
-	// 	print_token_type(tok);
-	// 	assert(tok->type == tests[i].expected_type);
-	// 	assert(strncmp(tok->literal->str, tests[i].expected_literal, tok->literal->size) == 0);
-	// 	temp_area_memory_end(temp);
-	// }
-	// arena_destroy(arena);
+	const char* input = "=+(){},;";
+	struct expected {
+		Token_Type expected_type;
+		const char* expected_literal;
+	};
+
+	struct expected tests[] = {
+		{ASSIGN, "="},
+		{PLUS, "+"},
+		{LPAREN, "("},
+		{RPAREN, ")"},
+		{LBRACE, "{"},
+		{RBRACE, "}"},
+		{COMMA, ","},
+		{SEMICOLON, ";"},
+		{MEOF, "\0"},
+	};
+
+	u64 length = sizeof(tests) / sizeof(tests[0]);
+
+	struct lexer* l = lexer_init(input);
+
+	for (u64 i = 0; i < length; i++) {
+		struct token* tok = lexer_next_token(l);
+		assert(tok->type == tests[i].expected_type);
+		assert(strncmp(tok->literal->str, tests[i].expected_literal, tok->literal->size) == 0);
+		token_destroy(tok);
+	}
+	lexer_destroy(l);
 }
 
 void test_lexer_complex(void)
@@ -173,7 +146,6 @@ void test_lexer_complex(void)
 
 int main(void)
 {
-	// test_lexer_simple();
-	test_arena();
+	test_lexer_simple();
 	test_hash_table();
 }

@@ -1,6 +1,6 @@
 #include <string.h>
+#include <stdlib.h>
 #include <stdbool.h>
-#include "arena.h"
 #include "lexer.h"
 #include "str.h"
 
@@ -9,10 +9,10 @@ static bool is_letter(char ch)
 	return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch == '_';
 }
 
-struct lexer* lexer_init(Arena* lexer_arena, const char* input)
+struct lexer* lexer_init(const char* input)
 {
-	struct lexer* l = arena_alloc(lexer_arena, sizeof(*l));
-	l->input = str_from_cstr(lexer_arena, input);
+	struct lexer* l = malloc(sizeof(*l));
+	l->input = str_from_cstr(input);
 	l->read_position = 0;
 	l->ch = '\0';
 	l->position = 0;
@@ -32,50 +32,48 @@ void lexer_read_char(struct lexer* l)
 	l->read_position += 1;
 }
 
-struct token* lexer_next_token(Arena* tok_arena, struct lexer* l)
+struct token* lexer_next_token(struct lexer* l)
 {
 	struct token* tok;
 
 	switch(l->ch)
 	{
 		case '=':
-			tok = token_init(tok_arena, str_from_char(tok_arena, l->ch), ASSIGN);
+			tok = token_init(str_from_char(l->ch), ASSIGN);
 			break;
 		case ';':
-			tok = token_init(tok_arena, str_from_char(tok_arena, l->ch), SEMICOLON);
+			tok = token_init(str_from_char(l->ch), SEMICOLON);
 			break;
 		case '(':
-			tok = token_init(tok_arena, str_from_char(tok_arena, l->ch), LPAREN);
+			tok = token_init(str_from_char(l->ch), LPAREN);
 			break;
 		case ')':
-			tok = token_init(tok_arena, str_from_char(tok_arena, l->ch), RPAREN);
+			tok = token_init(str_from_char(l->ch), RPAREN);
 			break;
 		case ',':
-			tok = token_init(tok_arena, str_from_char(tok_arena, l->ch), COMMA);
+			tok = token_init(str_from_char(l->ch), COMMA);
 			break;
 		case '+':
-			tok = token_init(tok_arena, str_from_char(tok_arena, l->ch), PLUS);
+			tok = token_init(str_from_char(l->ch), PLUS);
 			break;
 		case '{':
-			tok = token_init(tok_arena, str_from_char(tok_arena, l->ch), LBRACE);
+			tok = token_init(str_from_char(l->ch), LBRACE);
 			break;
 		case '}':
-			tok = token_init(tok_arena, str_from_char(tok_arena, l->ch), RBRACE);
+			tok = token_init(str_from_char(l->ch), RBRACE);
 			break;
 		case 0:
-			tok = token_init(tok_arena, str_from_char(tok_arena, '\0'), MEOF);
+			tok = token_init(str_from_char('\0'), MEOF);
 			break;
 		default:
 			if (is_letter(l->ch)) {
 				tok = token_init(
-					tok_arena,
-					lexer_read_indentifier(tok_arena, l),
+					lexer_read_indentifier(l),
 					IDENT
 				);
 				return tok;
 			} else {
-				tok = token_init(tok_arena, str_from_char(tok_arena, l->ch), MILLEGAL);
-				
+				tok = token_init(str_from_char(l->ch), MILLEGAL);
 			}
 			break;
 	}
@@ -84,17 +82,24 @@ struct token* lexer_next_token(Arena* tok_arena, struct lexer* l)
 	return tok;
 }
 
-Str* lexer_read_indentifier(Arena* tok_arena, struct lexer* l)
+Str* lexer_read_indentifier(struct lexer* l)
 {
 	u64 start = l->position;
 	while (is_letter(l->ch))
 		lexer_read_char(l);
 
 	u64 end = l->position;
-	Str* s = arena_alloc(tok_arena, sizeof(*s));
+	Str* s = malloc(sizeof(*s));
 	s->size = end - start;
-	s->str = arena_alloc(tok_arena, s->size);
+	s->str = malloc(s->size);
 	for (u64 i = start; i < end; i++)
 		s->str[i] = l->input->str[i];
 	return s;
+}
+
+void lexer_destroy(struct lexer* l)
+{
+	free(l->input->str);
+	free(l->input);
+	free(l);
 }

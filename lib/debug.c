@@ -1,7 +1,6 @@
 #include "debug.h"
 #include "hashtable.h"
 #include "token.h"
-#include "arena.h"
 #include <stdio.h>
 
 
@@ -36,11 +35,6 @@ void print_lexer_state(struct lexer *l)
 	printf("input: %.*s\ninput size: %zu\n", (int)l->input->size, l->input->str, l->input->size);
 	printf("position: %zu, read_position: %zu\n", l->position, l->read_position);
 	printf("current ch: %c\n", l->ch);
-}
-
-void print_arena_state(Arena* arena)
-{
-	printf("buf_len: %zu, cur_offset: %zu\n", arena->buf_len, arena->cur_offset);
 }
 
 void print_bool(bool x) {
