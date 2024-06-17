@@ -27,5 +27,6 @@ struct token {
 
 struct token* token_init(Str* s, Token_Type tt);
 void token_destroy(struct token* t);
+Token_Type lookup_indent(Str* indentifier);
 
 #endif // !TOKEN_H
