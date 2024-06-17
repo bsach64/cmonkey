@@ -182,7 +182,7 @@ void test_lexer_complex(void)
 
 	for (u64 i = 0; i < length; i++) {
 		struct token* tok = lexer_next_token(l);
-		print_token_type(tok);
+		print_token(tok);
 		assert(tok->type == tests[i].expected_type);
 		assert(strncmp(tok->literal->str, tests[i].expected_literal, tok->literal->size) == 0);
 		token_destroy(tok);

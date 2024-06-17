@@ -6,11 +6,12 @@
 
 #define TOKEN_TYPE(type, name) \
 	case (type):\
-		printf("%s\n", (name));\
+		printf(" Literal:%s\n", (name));\
 		break\
 
-void print_token_type(struct token* tok)
+void print_token(struct token* tok)
 {
+	printf("Type: %s", tok->literal->str);
 	switch(tok->type)
 	{
 		TOKEN_TYPE(MILLEGAL, "MILLEGAL");
