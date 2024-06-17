@@ -10,6 +10,12 @@ typedef enum {
 	INT,
 	ASSIGN,
 	PLUS,
+	MINUS,
+	BANG,
+	ASTERISK,
+	SLASH,
+	LT,
+	GT,
 	COMMA,
 	SEMICOLON,
 	LPAREN,
@@ -17,7 +23,14 @@ typedef enum {
 	LBRACE,
 	RBRACE,
 	FUNCTION,
-	LET
+	LET,
+	TRUE,
+	FALSE,
+	IF,
+	ELSE,
+	RETURN,
+	EQ,
+	NOT_EQ
 } Token_Type; 
 
 struct token {

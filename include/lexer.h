@@ -13,6 +13,7 @@ struct lexer {
 
 struct lexer* lexer_init(const char* input);
 void lexer_read_char(struct lexer* l);
+char lexer_peek_char(struct lexer* l);
 struct token* lexer_next_token(struct lexer* l);
 Str* lexer_read_indentifier(struct lexer* l);
 Str* lexer_read_number(struct lexer* l);

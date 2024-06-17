@@ -53,54 +53,77 @@ struct token* lexer_next_token(struct lexer* l)
 	switch(l->ch)
 	{
 		case '=':
-			tok = token_init(str_from_char(l->ch), ASSIGN);
-			lexer_read_char(l);
-			break;
-		case ';':
-			tok = token_init(str_from_char(l->ch), SEMICOLON);
-			lexer_read_char(l);
-			break;
-		case '(':
-			tok = token_init(str_from_char(l->ch), LPAREN);
-			lexer_read_char(l);
-			break;
-		case ')':
-			tok = token_init(str_from_char(l->ch), RPAREN);
-			lexer_read_char(l);
-			break;
-		case ',':
-			tok = token_init(str_from_char(l->ch), COMMA);
-			lexer_read_char(l);
+			if (lexer_peek_char(l) == '=') {
+				lexer_read_char(l);
+				tok = token_init(str_from_cstr("=="), EQ);
+			} else {
+				tok = token_init(str_from_char(l->ch), ASSIGN);
+			}
 			break;
 		case '+':
 			tok = token_init(str_from_char(l->ch), PLUS);
-			lexer_read_char(l);
+			break;
+		case '-':
+			tok = token_init(str_from_char(l->ch), MINUS);
+			break;
+		case '!':
+			if (lexer_peek_char(l) == '=') {
+				lexer_read_char(l);
+				tok = token_init(str_from_cstr("!="), NOT_EQ);
+			} else {
+				tok = token_init(str_from_char(l->ch), BANG);
+			}
+			break;
+		case '/':
+			tok = token_init(str_from_char(l->ch), SLASH);
+			break;
+		case '*':
+			tok = token_init(str_from_char(l->ch), ASTERISK);
+			break;
+		case '<':
+			tok = token_init(str_from_char(l->ch), LT);
+			break;
+		case '>':
+			tok = token_init(str_from_char(l->ch), GT);
+			break;
+		case ';':
+			tok = token_init(str_from_char(l->ch), SEMICOLON);
+			break;
+		case '(':
+			tok = token_init(str_from_char(l->ch), LPAREN);
+			break;
+		case ')':
+			tok = token_init(str_from_char(l->ch), RPAREN);
+			break;
+		case ',':
+			tok = token_init(str_from_char(l->ch), COMMA);
 			break;
 		case '{':
 			tok = token_init(str_from_char(l->ch), LBRACE);
-			lexer_read_char(l);
 			break;
 		case '}':
 			tok = token_init(str_from_char(l->ch), RBRACE);
-			lexer_read_char(l);
 			break;
 		case 0:
 			tok = token_init(str_from_char('\0'), MEOF);
-			lexer_read_char(l);
 			break;
 		default:
 			if (is_letter(l->ch)) {
 				Str* indentifier = lexer_read_indentifier(l);
 				Token_Type tt = lookup_indent(indentifier);
 				tok = token_init(indentifier, tt);
+				return tok;
 			} else if (is_digit(l->ch)) {
 				tok = token_init(lexer_read_number(l), INT);
+				return tok;
 			} else {
 				tok = token_init(str_from_char(l->ch), MILLEGAL);
+				return tok;
 			}
 			break;
 	}
 
+	lexer_read_char(l);
 	return tok;
 }
 
@@ -134,6 +157,14 @@ Str* lexer_read_number(struct lexer* l)
 		s->str[i] = l->input->str[start + i];
 	s->str[s->size] = '\0';
 	return s;
+}
+
+char lexer_peek_char(struct lexer* l)
+{
+	if (l->read_position >= l->input->size) {
+		return 0;
+	}
+	return l->input->str[l->read_position];
 }
 
 void lexer_destroy(struct lexer* l)

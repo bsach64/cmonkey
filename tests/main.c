@@ -89,10 +89,10 @@ void test_lexer_complex(void)
 		"\treturn true;"
 	"} else {"
 		"\treturn false;"
-	"}";
-	//
-	// "10 == 10;"
-	// "10 != 9;";
+	"}"
+
+	"10 == 10;"
+	"10 != 9;";
 
 	struct expected {
 		Token_Type expected_type;
@@ -165,6 +165,14 @@ void test_lexer_complex(void)
 		{FALSE, "false"},
 		{SEMICOLON, ";"},
 		{RBRACE, "}"},
+		{INT, "10"},
+		{EQ, "=="},
+		{INT, "10"},
+		{SEMICOLON, ";"},
+		{INT, "10"},
+		{NOT_EQ, "!="},
+		{INT, "9"},
+		{SEMICOLON, ";"},
 		{MEOF, "\0"}
 	};
 
