@@ -3,7 +3,6 @@
 #include "token.h"
 #include <stdio.h>
 
-
 #define TOKEN_TYPE(type, name) \
 	case (type):\
 		printf(" Literal:%s\n", (name));\
@@ -59,7 +58,7 @@ void print_bool(bool x) {
 	}
 }
 
-void print_hash_table(Hash_Table* h)
+void print_hash_table(hash_table* h)
 {
 	printf("{\n");
 	for (u64 i = 0; i < h->size; i++) {
@@ -70,7 +69,7 @@ void print_hash_table(Hash_Table* h)
 	printf("}\n");
 }
 
-void print_hash_table_debug(Hash_Table* h)
+void print_hash_table_debug(hash_table* h)
 {
 	printf("{\n");
 	for (u64 i = 0; i < h->size; i++) {

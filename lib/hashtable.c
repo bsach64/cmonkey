@@ -16,9 +16,9 @@ static u64 hash(const char* key, u64 size)
 	return (u64)hash;
 }
 
-static Hash_Table* hash_table_rebuild(Hash_Table* h, u64 new_size)
+static hash_table* hash_table_rebuild(hash_table* h, u64 new_size)
 {
-	Hash_Table* new_h = hash_table_init(new_size);
+	hash_table* new_h = hash_table_init(new_size);
 	for (u64 i = 0; i < h->size; i++) {
 		if (h->entries[i].empty || h->entries[i].delete_me)
 			continue;
@@ -28,9 +28,9 @@ static Hash_Table* hash_table_rebuild(Hash_Table* h, u64 new_size)
 	return new_h;
 }
 
-Hash_Table* hash_table_init(u64 initial_size)
+hash_table* hash_table_init(u64 initial_size)
 {
-	Hash_Table* h = malloc(sizeof(*h));
+	hash_table* h = malloc(sizeof(*h));
 	if (!h)
 		goto malloc_fail;
 	h->size = initial_size;
@@ -50,7 +50,7 @@ malloc_fail:
 	exit(EXIT_FAILURE);
 }
 
-void hash_table_destroy(Hash_Table* h)
+void hash_table_destroy(hash_table* h)
 {
 	for (u64 i = 0; i < h->size; i++) {
 		if (h->entries[i].empty)
@@ -62,7 +62,7 @@ void hash_table_destroy(Hash_Table* h)
 	free(h);
 }
 
-Hash_Table* hash_table_insert(Hash_Table* h, const char* key, i32 value)
+hash_table* hash_table_insert(hash_table* h, const char* key, i32 value)
 {
 	u64 length = strlen(key);
 	char* ckey = malloc(length + 1);
@@ -87,14 +87,14 @@ Hash_Table* hash_table_insert(Hash_Table* h, const char* key, i32 value)
 	h->entries[i].key->str = ckey;
 	
 	if ((h->filled / (double) h->size) > LOAD_FACTOR) {
-		Hash_Table* new_h = hash_table_rebuild(h, h->size * 2);
+		hash_table* new_h = hash_table_rebuild(h, h->size * 2);
 		h = new_h;
 	}
 	
 	return h;
 }
 
-Hash_Table* hash_table_delete(Hash_Table* h, const char* key)
+hash_table* hash_table_delete(hash_table* h, const char* key)
 {
 	u64 key_len = strlen(key);
 	u64 i = hash(key, key_len) % h->size;
@@ -115,7 +115,7 @@ Hash_Table* hash_table_delete(Hash_Table* h, const char* key)
 	return h;
 }
 
-bool hash_table_search(Hash_Table* h, const char* key)
+bool hash_table_search(hash_table* h, const char* key)
 {
 	u64 key_len = strlen(key);
 	u64 i = hash(key, key_len) % h->size;
@@ -130,7 +130,7 @@ bool hash_table_search(Hash_Table* h, const char* key)
 	return false;
 }
 
-i32 hash_table_get(Hash_Table* h, const char* key)
+i32 hash_table_get(hash_table* h, const char* key)
 {
 	u64 key_len = strlen(key);
 	u64 i = hash(key, key_len) % h->size;

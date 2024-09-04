@@ -109,8 +109,8 @@ struct token* lexer_next_token(struct lexer* l)
 			break;
 		default:
 			if (is_letter(l->ch)) {
-				Str* indentifier = lexer_read_indentifier(l);
-				Token_Type tt = lookup_indent(indentifier);
+				string* indentifier = lexer_read_indentifier(l);
+				token_type tt = lookup_indent(indentifier);
 				tok = token_init(indentifier, tt);
 				return tok;
 			} else if (is_digit(l->ch)) {
@@ -127,14 +127,14 @@ struct token* lexer_next_token(struct lexer* l)
 	return tok;
 }
 
-Str* lexer_read_indentifier(struct lexer* l)
+string* lexer_read_indentifier(struct lexer* l)
 {
 	u64 start = l->position;
 	while (is_letter(l->ch))
 		lexer_read_char(l);
 
 	u64 end = l->position;
-	Str* s = malloc(sizeof(*s));
+	string* s = malloc(sizeof(*s));
 	s->size = end - start;
 	s->str = malloc(s->size + 1);
 	for (u64 i = 0; i < s->size; i++)
@@ -143,14 +143,14 @@ Str* lexer_read_indentifier(struct lexer* l)
 	return s;
 }
 
-Str* lexer_read_number(struct lexer* l)
+string* lexer_read_number(struct lexer* l)
 {
 	u64 start = l->position;
 	while (is_digit(l->ch))
 		lexer_read_char(l);
 
 	u64 end = l->position;
-	Str* s = malloc(sizeof(*s));
+	string* s = malloc(sizeof(*s));
 	s->size = end - start;
 	s->str = malloc(s->size + 1);
 	for (u64 i = 0; i < s->size; i++)

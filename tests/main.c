@@ -9,7 +9,7 @@
 
 void test_hash_table(void)
 {
-	Hash_Table* h = hash_table_init(3);
+	hash_table* h = hash_table_init(3);
 	assert(h->size == 3);
 	h = hash_table_insert(h, "bhavik", 10);
 	h = hash_table_insert(h, "sachdev", 20);
@@ -43,7 +43,7 @@ void test_lexer_simple(void)
 {
 	const char* input = "=+(){},;";
 	struct expected {
-		Token_Type expected_type;
+		token_type expected_type;
 		const char* expected_literal;
 	};
 
@@ -95,7 +95,7 @@ void test_lexer_complex(void)
 	"10 != 9;";
 
 	struct expected {
-		Token_Type expected_type;
+		token_type expected_type;
 		const char* expected_literal;
 	};
 

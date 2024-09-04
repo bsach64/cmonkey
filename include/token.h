@@ -31,15 +31,15 @@ typedef enum {
 	RETURN,
 	EQ,
 	NOT_EQ
-} Token_Type; 
+} token_type; 
 
 struct token {
-	Token_Type type;
-	Str* literal;
+	token_type type;
+	string* literal;
 };
 
-struct token* token_init(Str* s, Token_Type tt);
+struct token* token_init(string* s, token_type tt);
 void token_destroy(struct token* t);
-Token_Type lookup_indent(Str* indentifier);
+token_type lookup_indent(string* indentifier);
 
 #endif // !TOKEN_H

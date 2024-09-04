@@ -3,7 +3,7 @@
 #include "token.h"
 #include "hashtable.h"
 
-struct token* token_init(Str* s, Token_Type tt)
+struct token* token_init(string* s, token_type tt)
 {
 	struct token* tok = malloc(sizeof(*tok));
 	tok->literal = s;
@@ -18,10 +18,10 @@ void token_destroy(struct token* t)
 	free(t);
 }
 
-Token_Type lookup_indent(Str* indentifier)
+token_type lookup_indent(string* indentifier)
 {
-	Token_Type t = IDENT;
-	Hash_Table* keywords = hash_table_init(16);
+	token_type t = IDENT;
+	hash_table* keywords = hash_table_init(16);
 	keywords = hash_table_insert(keywords, "fn", FUNCTION);
 	keywords = hash_table_insert(keywords, "let", LET);
 	keywords = hash_table_insert(keywords, "true", TRUE);
