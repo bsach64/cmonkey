@@ -1,5 +1,3 @@
-#include "str.h"
-
 #ifndef TOKEN_H
 #define TOKEN_H
 
@@ -35,11 +33,16 @@ typedef enum {
 
 struct token {
 	token_type type;
-	string* literal;
+	char* literal;
 };
 
-struct token* token_init(string* s, token_type tt);
-void token_destroy(struct token* t);
-token_type lookup_indent(string* indentifier);
+extern struct token *tok;
+
+int token_char_init(char s, token_type tt);
+int token_str_init(const char* s, token_type tt);
+void token_destroy(void);
+int init_keywords(void);
+void free_keywords(void);
+token_type lookup_indent(char* indentifier);
 
 #endif // !TOKEN_H

@@ -4,7 +4,7 @@ LIBDIRS=./lib/
 CODEDIRS=.
 INCDIRS=. ./include/
 
-CC=clang
+CC=gcc
 OPT=-O0
 # generate files that encode make rules for the .h dependencies
 DEPFLAGS=-MP -MD

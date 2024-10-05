@@ -7,6 +7,8 @@
 int main(void)
 {
 	char* line = NULL;
+	if (init_keywords())
+		return -1;
 	size_t size = 0;
 
 	printf("Hello! This is the Monkey Programming language!\n");
@@ -14,16 +16,20 @@ int main(void)
 	while (1) {
 		printf(">> ");
 		getline(&line, &size, stdin);
-		struct lexer* l = lexer_init(line);
-		struct token* t = lexer_next_token(l);
-		while (t->type != MEOF) {
-			print_token(t);
-			token_destroy(t);
-			t = lexer_next_token(l);
+		if (lexer_init(line))
+			return -1;
+		if (lexer_next_token())
+			return -1;
+		while (tok->type != MEOF) {
+			print_token();
+			token_destroy();
+			if (lexer_next_token())
+				return -1;
 		}
-		lexer_destroy(l);
+		lexer_destroy();
 		free(line);
 		line = NULL;
 		size = 0;
 	}
+	free_keywords();
 }

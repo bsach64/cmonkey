@@ -2,18 +2,19 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "lexer.h"
-#include "str.h"
-#include <stdio.h>
+#include "token.h"
+
+struct lexer *l;
 
 static bool is_letter(char ch)
 {
 	return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch == '_';
 }
 
-static void skip_whitespace(struct lexer* l)
+static void skip_whitespace(void)
 {
 	while (l->ch == ' ' || l->ch == '\t' || l->ch == '\n' || l->ch == '\r') {
-		lexer_read_char(l);
+		lexer_read_char();
 	}
 }
 
@@ -22,154 +23,186 @@ static bool is_digit(char ch)
 	return '0' <= ch && ch <= '9';
 }
 
-struct lexer* lexer_init(const char* input)
+int lexer_init(const char* input)
 {
-	struct lexer* l = malloc(sizeof(*l));
-	l->input = str_from_cstr(input);
+	l = malloc(sizeof(*l));
+	if (!l)
+		return -1;
+
+	l->input_len = strlen(input);
+	l->input = malloc(l->input_len + 1);
+	if (!l->input)
+		return -1;
+	strcpy(l->input, input);
 	l->read_position = 0;
 	l->ch = '\0';
 	l->position = 0;
 
-	lexer_read_char(l);
-	return l;
+	lexer_read_char();
+	return 0;
 }
 
-void lexer_read_char(struct lexer* l) 
+void lexer_read_char(void)
 {
-	if (l->read_position >= l->input->size) {
+	if (l->read_position >= l->input_len) {
 		l->ch = 0;
 	} else {
-		l->ch = l->input->str[l->read_position];
+		l->ch = l->input[l->read_position];
 	}
 	l->position = l->read_position;
 	l->read_position += 1;
 }
 
-struct token* lexer_next_token(struct lexer* l)
+int lexer_next_token(void)
 {
-	struct token* tok;
-	
-	skip_whitespace(l);
+	skip_whitespace();
 	switch(l->ch)
 	{
 		case '=':
-			if (lexer_peek_char(l) == '=') {
-				lexer_read_char(l);
-				tok = token_init(str_from_cstr("=="), EQ);
+			if (lexer_peek_char() == '=') {
+				lexer_read_char();
+				if (token_str_init("==", EQ))
+					return -1;
 			} else {
-				tok = token_init(str_from_char(l->ch), ASSIGN);
+				if (token_char_init(l->ch, ASSIGN))
+					return -1;
 			}
 			break;
 		case '+':
-			tok = token_init(str_from_char(l->ch), PLUS);
+			if (token_char_init(l->ch, PLUS))
+				return -1;
 			break;
 		case '-':
-			tok = token_init(str_from_char(l->ch), MINUS);
+			if (token_char_init(l->ch, MINUS))
+				return -1;
 			break;
 		case '!':
-			if (lexer_peek_char(l) == '=') {
-				lexer_read_char(l);
-				tok = token_init(str_from_cstr("!="), NOT_EQ);
+			if (lexer_peek_char() == '=') {
+				lexer_read_char();
+				if (token_str_init("!=", NOT_EQ))
+					return -1;
 			} else {
-				tok = token_init(str_from_char(l->ch), BANG);
+				if (token_char_init(l->ch, BANG))
+					return -1;
 			}
 			break;
 		case '/':
-			tok = token_init(str_from_char(l->ch), SLASH);
+			if (token_char_init(l->ch, SLASH))
+				return -1;
 			break;
 		case '*':
-			tok = token_init(str_from_char(l->ch), ASTERISK);
+			if (token_char_init(l->ch, ASTERISK))
+				return -1;
 			break;
 		case '<':
-			tok = token_init(str_from_char(l->ch), LT);
+			if (token_char_init(l->ch, LT))
+				return -1;
 			break;
 		case '>':
-			tok = token_init(str_from_char(l->ch), GT);
+			if (token_char_init(l->ch, GT))
+				return -1;
 			break;
 		case ';':
-			tok = token_init(str_from_char(l->ch), SEMICOLON);
+			if (token_char_init(l->ch, SEMICOLON))
+				return -1;
 			break;
 		case '(':
-			tok = token_init(str_from_char(l->ch), LPAREN);
+			if (token_char_init(l->ch, LPAREN))
+				return -1;
 			break;
 		case ')':
-			tok = token_init(str_from_char(l->ch), RPAREN);
+			if (token_char_init(l->ch, RPAREN))
+				return -1;
 			break;
 		case ',':
-			tok = token_init(str_from_char(l->ch), COMMA);
+			if (token_char_init(l->ch, COMMA))
+				return -1;
 			break;
 		case '{':
-			tok = token_init(str_from_char(l->ch), LBRACE);
+			if (token_char_init(l->ch, LBRACE))
+				return -1;
 			break;
 		case '}':
-			tok = token_init(str_from_char(l->ch), RBRACE);
+			if (token_char_init(l->ch, RBRACE))
+				return -1;
 			break;
 		case 0:
-			tok = token_init(str_from_char('\0'), MEOF);
+			if (token_char_init(l->ch, MEOF))
+				return -1;
 			break;
 		default:
 			if (is_letter(l->ch)) {
-				string* indentifier = lexer_read_indentifier(l);
+				char* indentifier = lexer_read_indentifier();
+				if (!indentifier)
+					return -1;
 				token_type tt = lookup_indent(indentifier);
-				tok = token_init(indentifier, tt);
-				return tok;
+				if (token_str_init(indentifier, tt))
+					return -1;
+				free(indentifier);
+				return 0;
 			} else if (is_digit(l->ch)) {
-				tok = token_init(lexer_read_number(l), INT);
-				return tok;
+				char* number = lexer_read_number();
+				if (!number)
+					return -1;
+				if (token_str_init(number, INT))
+					return -1;
+				free(number);
+				return 0;
 			} else {
-				tok = token_init(str_from_char(l->ch), MILLEGAL);
-				return tok;
+				if (token_char_init(l->ch, MILLEGAL))
+					return -1;
 			}
 			break;
 	}
 
-	lexer_read_char(l);
-	return tok;
+	lexer_read_char();
+	return 0;
 }
 
-string* lexer_read_indentifier(struct lexer* l)
+char* lexer_read_indentifier(void)
 {
-	u64 start = l->position;
+	size_t start = l->position;
 	while (is_letter(l->ch))
-		lexer_read_char(l);
+		lexer_read_char();
 
-	u64 end = l->position;
-	string* s = malloc(sizeof(*s));
-	s->size = end - start;
-	s->str = malloc(s->size + 1);
-	for (u64 i = 0; i < s->size; i++)
-		s->str[i] = l->input->str[start + i];
-	s->str[s->size] = '\0';
-	return s;
+	size_t end = l->position;
+	size_t size = end - start;
+	char *indentifier = malloc(size + 1);
+	if (!indentifier)
+		return NULL;
+	for (size_t i = 0; i < size; i++)
+		indentifier[i] = l->input[start + i];
+	indentifier[size] = '\0';
+	return indentifier;
 }
 
-string* lexer_read_number(struct lexer* l)
+char* lexer_read_number(void)
 {
-	u64 start = l->position;
+	size_t start = l->position;
 	while (is_digit(l->ch))
-		lexer_read_char(l);
+		lexer_read_char();
 
-	u64 end = l->position;
-	string* s = malloc(sizeof(*s));
-	s->size = end - start;
-	s->str = malloc(s->size + 1);
-	for (u64 i = 0; i < s->size; i++)
-		s->str[i] = l->input->str[start + i];
-	s->str[s->size] = '\0';
-	return s;
+	size_t end = l->position;
+	size_t size = end - start;
+	char *number = malloc(size + 1);
+	if (!number)
+		return NULL;
+	for (size_t i = 0; i < size; i++)
+		number[i] = l->input[start + i];
+	number[size] = '\0';
+	return number;
 }
 
-char lexer_peek_char(struct lexer* l)
+char lexer_peek_char(void)
 {
-	if (l->read_position >= l->input->size) {
+	if (l->read_position >= l->input_len) {
 		return 0;
 	}
-	return l->input->str[l->read_position];
+	return l->input[l->read_position];
 }
 
-void lexer_destroy(struct lexer* l)
+void lexer_destroy(void)
 {
-	free(l->input->str);
 	free(l->input);
 	free(l);
 }

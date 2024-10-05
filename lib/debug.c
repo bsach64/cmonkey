@@ -1,16 +1,17 @@
 #include "debug.h"
-#include "hashtable.h"
 #include "token.h"
+#include "lexer.h"
 #include <stdio.h>
+#include <stdbool.h>
 
 #define TOKEN_TYPE(type, name) \
 	case (type):\
 		printf(" Literal:%s\n", (name));\
 		break\
 
-void print_token(struct token* tok)
+void print_token(void)
 {
-	printf("Type: %s", tok->literal->str);
+	printf("Type: %s", tok->literal);
 	switch(tok->type)
 	{
 		TOKEN_TYPE(MILLEGAL, "MILLEGAL");
@@ -43,9 +44,9 @@ void print_token(struct token* tok)
 	}
 }
 
-void print_lexer_state(struct lexer *l)
+void print_lexer_state(void)
 {
-	printf("input: %.*s\ninput size: %zu\n", (int)l->input->size, l->input->str, l->input->size);
+	printf("input: %s\ninput size: %lu\n", l->input, l->input_len);
 	printf("position: %zu, read_position: %zu\n", l->position, l->read_position);
 	printf("current ch: %c\n", l->ch);
 }
@@ -56,32 +57,4 @@ void print_bool(bool x) {
 	} else {
 		printf("false");
 	}
-}
-
-void print_hash_table(hash_table* h)
-{
-	printf("{\n");
-	for (u64 i = 0; i < h->size; i++) {
-		if (h->entries[i].empty == false || h->entries[i].delete_me == false) {
-			printf("\t\"%.*s\":%hhu\n", (int)h->entries[i].key->size, h->entries[i].key->str, h->entries[i].value);
-		}
-	}
-	printf("}\n");
-}
-
-void print_hash_table_debug(hash_table* h)
-{
-	printf("{\n");
-	for (u64 i = 0; i < h->size; i++) {
-		printf("\t{ ");
-		printf("delete_me: ");
-		print_bool(h->entries[i].delete_me);
-		printf(" empty: ");
-		print_bool(h->entries[i].empty);
-		if (h->entries[i].empty == false || h->entries[i].delete_me == false) {
-			printf(" \"%.*s\":%hhu", (int)h->entries[i].key->size, h->entries[i].key->str, h->entries[i].value);
-		}
-		printf(" }\n");
-	}
-	printf("}\n");
 }

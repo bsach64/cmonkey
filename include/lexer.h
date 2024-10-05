@@ -1,22 +1,23 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "token.h"
-#include "str.h"
+#include <stdlib.h>
 
 struct lexer {
-	string* input;
-	u64 position;
-	u64 read_position;
+	char* input;
+	size_t position;
+	size_t read_position;
+	size_t input_len;
 	char ch;
 };
 
-struct lexer* lexer_init(const char* input);
-void lexer_read_char(struct lexer* l);
-char lexer_peek_char(struct lexer* l);
-struct token* lexer_next_token(struct lexer* l);
-string* lexer_read_indentifier(struct lexer* l);
-string* lexer_read_number(struct lexer* l);
-void lexer_destroy(struct lexer* l);
+extern struct lexer *l;
+int lexer_init(const char* input);
+void lexer_read_char(void);
+char lexer_peek_char(void);
+int lexer_next_token(void);
+char* lexer_read_indentifier(void);
+char* lexer_read_number(void);
+void lexer_destroy(void);
 
 #endif // !LEXER_H

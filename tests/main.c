@@ -1,45 +1,12 @@
 #include "debug.h"
-#include "hashtable.h"
-#include "str.h"
 #include "token.h"
 #include "lexer.h"
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
 
-void test_hash_table(void)
-{
-	hash_table* h = hash_table_init(3);
-	assert(h->size == 3);
-	h = hash_table_insert(h, "bhavik", 10);
-	h = hash_table_insert(h, "sachdev", 20);
-	assert(hash_table_search(h, "bhavik") == true);
-	assert(hash_table_get(h, "bhavik") == 10);
-	h = hash_table_insert(h, "bhavik", 20);
-	assert(hash_table_get(h, "bhavik") == 20);
-	assert(h->size == 3);
-	h = hash_table_insert(h, "noice", 50);
-	assert(h->size == 6);
-	h = hash_table_insert(h, "please", 60);
-	h = hash_table_insert(h, "okay", 100);
-	assert(hash_table_search(h, "noice") == true);
-	assert(h->size == 12);
-	hash_table_destroy(h);
-	
-	h = hash_table_init(1);
-	h = hash_table_delete(h, "bhavik");
-	h = hash_table_insert(h, "bhavik", 10);
-	assert(h->size == 2);
-	h = hash_table_insert(h, "sachdev", 13);
-	assert(h->size == 4);
-	assert(hash_table_search(h, "bhavik") == true);
-	h = hash_table_delete(h, "bhavik");
-	assert(hash_table_search(h, "bhavik") == false);
-	assert(h->size == 2);
-	hash_table_destroy(h);
-}
-
-void test_lexer_simple(void)
+int test_lexer_simple(void)
 {
 	const char* input = "=+(){},;";
 	struct expected {
@@ -59,20 +26,23 @@ void test_lexer_simple(void)
 		{MEOF, "\0"},
 	};
 
-	u64 length = sizeof(tests) / sizeof(tests[0]);
+	size_t length = sizeof(tests) / sizeof(tests[0]);
 
-	struct lexer* l = lexer_init(input);
+	if (lexer_init(input))
+		return -1;
 
-	for (u64 i = 0; i < length; i++) {
-		struct token* tok = lexer_next_token(l);
+	for (size_t i = 0; i < length; i++) {
+		if (lexer_next_token())
+			return -1;
 		assert(tok->type == tests[i].expected_type);
-		assert(strncmp(tok->literal->str, tests[i].expected_literal, tok->literal->size) == 0);
-		token_destroy(tok);
+		assert(strncmp(tok->literal, tests[i].expected_literal, strlen(tok->literal)) == 0);
+		token_destroy();
 	}
-	lexer_destroy(l);
+	lexer_destroy();
+	return 0;
 }
 
-void test_lexer_complex(void)
+int test_lexer_complex(void)
 {
 	const char* input = "let five = 5;\n"
 	"let ten = 10;\n"
@@ -176,23 +146,32 @@ void test_lexer_complex(void)
 		{MEOF, "\0"}
 	};
 
-	u64 length = sizeof(tests) / sizeof(tests[0]);
+	size_t length = sizeof(tests) / sizeof(tests[0]);
 
-	struct lexer* l = lexer_init(input);
+	if (lexer_init(input))
+		return -1;
 
-	for (u64 i = 0; i < length; i++) {
-		struct token* tok = lexer_next_token(l);
-		print_token(tok);
+	for (size_t i = 0; i < length; i++) {
+		if (lexer_next_token())
+			return -1;
+		print_token();
 		assert(tok->type == tests[i].expected_type);
-		assert(strncmp(tok->literal->str, tests[i].expected_literal, tok->literal->size) == 0);
-		token_destroy(tok);
+		assert(strncmp(tok->literal, tests[i].expected_literal, strlen(tok->literal)) == 0);
+		token_destroy();
 	}
-	lexer_destroy(l);
+	lexer_destroy();
+	return 0;
 }
 
 int main(void)
 {
-	test_lexer_complex();
-	test_lexer_simple();
-	test_hash_table();
+	if (init_keywords())
+		return -1;
+	if (test_lexer_complex())
+		return -1;
+	if (test_lexer_simple())
+		return -1;
+
+	free_keywords();
+	return 0;
 }
