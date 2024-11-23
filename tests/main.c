@@ -6,6 +6,15 @@
 #include <assert.h>
 #include <stdio.h>
 
+int test_let_statements(void)
+{
+	// I will write the test later
+	const char *input = "let x = 5;\n"
+	"let y = 10;\n"
+	"let foobar = 838383;";
+	return 0;
+}
+
 int test_lexer_simple(void)
 {
 	const char* input = "=+(){},;";
@@ -36,7 +45,7 @@ int test_lexer_simple(void)
 			return -1;
 		assert(tok->type == tests[i].expected_type);
 		assert(strncmp(tok->literal, tests[i].expected_literal, strlen(tok->literal)) == 0);
-		token_destroy();
+		token_destroy(tok);
 	}
 	lexer_destroy();
 	return 0;
@@ -157,7 +166,7 @@ int test_lexer_complex(void)
 		print_token();
 		assert(tok->type == tests[i].expected_type);
 		assert(strncmp(tok->literal, tests[i].expected_literal, strlen(tok->literal)) == 0);
-		token_destroy();
+		token_destroy(tok);
 	}
 	lexer_destroy();
 	return 0;

@@ -22,7 +22,7 @@ int main(void)
 			return -1;
 		while (tok->type != MEOF) {
 			print_token();
-			token_destroy();
+			token_destroy(tok);
 			if (lexer_next_token())
 				return -1;
 		}

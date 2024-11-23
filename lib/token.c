@@ -3,6 +3,7 @@
 
 #include "token.h"
 #include "list.h"
+#include "gc.h"
 
 #define KEYWORD_TABLE_SIZE 32
 #define INSERT_KEYWORD(ptr, str, tok)			\
@@ -24,11 +25,11 @@ struct keyword_entry {
 
 int init_keyword_entry(const char* word, token_type t, struct keyword_entry* entry)
 {
-	entry = malloc(sizeof(*entry));
+	entry = gc_malloc(sizeof(*entry));
 	if (!entry)
 		return -1;
 
-	entry->keyword = malloc(strlen(word) + 1);
+	entry->keyword = gc_malloc(strlen(word) + 1);
 	if (!entry->keyword)
 		return -1;
 
@@ -47,8 +48,8 @@ void free_keywords(void)
 
 	for (int i = 0; i < KEYWORD_TABLE_SIZE; i++) {
 		hlist_for_each_entry_safe(word, tmp, &keywords[i], hash) {
-			free(word->keyword);
-			free(word);
+			gc_free(word->keyword);
+			gc_free(word);
 		}
 		INIT_HLIST_HEAD(&keywords[i]);
 	}
@@ -73,13 +74,13 @@ err:
 
 int token_char_init(char s, token_type tt)
 {
-	tok = malloc(sizeof(*tok));
+	tok = gc_malloc(sizeof(*tok));
 	if (!tok)
 		return -1;
 
-	tok->literal = malloc(2);
+	tok->literal = gc_malloc(2);
 	if (!tok->literal) {
-		free(tok);
+		gc_free(tok);
 		return -1;
 	}
 
@@ -91,14 +92,14 @@ int token_char_init(char s, token_type tt)
 
 int token_str_init(const char* s, token_type tt)
 {
-	tok = malloc(sizeof(*tok));
+	tok = gc_malloc(sizeof(*tok));
 	if (!tok)
 		return -1;
 
 	size_t length = strlen(s);
-	tok->literal = malloc(length + 1);
+	tok->literal = gc_malloc(length + 1);
 	if (!tok->literal) {
-		free(tok);
+		gc_free(tok);
 		return -1;
 	}
 
@@ -107,10 +108,10 @@ int token_str_init(const char* s, token_type tt)
 	return 0;
 }
 
-void token_destroy(void)
+void token_destroy(struct token *t)
 {
-	free(tok->literal);
-	free(tok);
+	gc_free(t->literal);
+	gc_free(t);
 }
 
 token_type lookup_indent(char* indentifier)

@@ -40,7 +40,7 @@ extern struct token *tok;
 
 int token_char_init(char s, token_type tt);
 int token_str_init(const char* s, token_type tt);
-void token_destroy(void);
+void token_destroy(struct token *t);
 int init_keywords(void);
 void free_keywords(void);
 token_type lookup_indent(char* indentifier);

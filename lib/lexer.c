@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "lexer.h"
 #include "token.h"
+#include "gc.h"
 
 struct lexer *l;
 
@@ -25,12 +26,12 @@ static bool is_digit(char ch)
 
 int lexer_init(const char* input)
 {
-	l = malloc(sizeof(*l));
+	l = gc_malloc(sizeof(*l));
 	if (!l)
 		return -1;
 
 	l->input_len = strlen(input);
-	l->input = malloc(l->input_len + 1);
+	l->input = gc_malloc(l->input_len + 1);
 	if (!l->input)
 		return -1;
 	strcpy(l->input, input);
@@ -138,7 +139,7 @@ int lexer_next_token(void)
 				token_type tt = lookup_indent(indentifier);
 				if (token_str_init(indentifier, tt))
 					return -1;
-				free(indentifier);
+				gc_free(indentifier);
 				return 0;
 			} else if (is_digit(l->ch)) {
 				char* number = lexer_read_number();
@@ -146,7 +147,7 @@ int lexer_next_token(void)
 					return -1;
 				if (token_str_init(number, INT))
 					return -1;
-				free(number);
+				gc_free(number);
 				return 0;
 			} else {
 				if (token_char_init(l->ch, MILLEGAL))
@@ -167,7 +168,7 @@ char* lexer_read_indentifier(void)
 
 	size_t end = l->position;
 	size_t size = end - start;
-	char *indentifier = malloc(size + 1);
+	char *indentifier = gc_malloc(size + 1);
 	if (!indentifier)
 		return NULL;
 	for (size_t i = 0; i < size; i++)
@@ -184,7 +185,7 @@ char* lexer_read_number(void)
 
 	size_t end = l->position;
 	size_t size = end - start;
-	char *number = malloc(size + 1);
+	char *number = gc_malloc(size + 1);
 	if (!number)
 		return NULL;
 	for (size_t i = 0; i < size; i++)
@@ -203,6 +204,6 @@ char lexer_peek_char(void)
 
 void lexer_destroy(void)
 {
-	free(l->input);
-	free(l);
+	gc_free(l->input);
+	gc_free(l);
 }
