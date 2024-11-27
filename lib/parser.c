@@ -16,14 +16,14 @@ struct program *prg;
 
 static struct token *copy_tok(void)
 {
-	size_t len = strlen(p->cur_tok->literal);
+	size_t len = strlen(p->cur_tok->literal) + 1;
 	struct token *dup_tok = gc_malloc(sizeof(*p->cur_tok));
 	if (!dup_tok)
 		return NULL;
 
 	dup_tok->type = p->cur_tok->type;
 	dup_tok->literal = gc_malloc(len);
-	if (!dup_tok)
+	if (!dup_tok->literal)
 		return NULL;
 	memcpy(dup_tok->literal, p->cur_tok->literal, len);
 	return dup_tok;
@@ -125,7 +125,7 @@ int parse_let_statement(void)
 	if (!let->ident->token)
 		return -1;
 
-	size_t ident_len = strlen(let->ident->token->literal);
+	size_t ident_len = strlen(let->ident->token->literal) + 1;
 	let->ident->value = gc_malloc(ident_len);
 	if (!let->ident->value)
 		return -1;
