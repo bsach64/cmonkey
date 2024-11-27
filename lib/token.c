@@ -14,6 +14,10 @@ do {							\
 							\
 } while(0)
 
+#define RETURN_STR(t, s)	\
+	case (t):		\
+		return (s);	\
+
 static struct hlist_head keywords[32];
 struct token *tok;
 
@@ -22,6 +26,39 @@ struct keyword_entry {
 	token_type t;
 	struct hlist_node hash;
 };
+
+char* token_type_to_str(token_type tt) {
+	switch(tt)
+	{
+		RETURN_STR(MILLEGAL, "MILLEGAL");
+		RETURN_STR(MEOF, "MEOF");
+		RETURN_STR(IDENT, "INDENT");
+		RETURN_STR(INT, "INT");
+		RETURN_STR(ASSIGN, "ASSIGN");
+		RETURN_STR(PLUS, "PLUS");
+		RETURN_STR(MINUS, "MINUS");
+		RETURN_STR(BANG, "BANG");
+		RETURN_STR(ASTERISK, "ASTERISK");
+		RETURN_STR(SLASH, "SLASH");
+		RETURN_STR(LT, "LT");
+		RETURN_STR(GT, "GT");
+		RETURN_STR(COMMA, "COMMA");
+		RETURN_STR(SEMICOLON, "SEMICOLON");
+		RETURN_STR(LPAREN, "LPAREN");
+		RETURN_STR(RPAREN, "RPAREN");
+		RETURN_STR(LBRACE, "LBRACE");
+		RETURN_STR(RBRACE, "RBRACE");
+		RETURN_STR(FUNCTION, "FUNCTION");
+		RETURN_STR(LET, "LET");
+		RETURN_STR(TRUE, "TRUE");
+		RETURN_STR(FALSE, "FALSE");
+		RETURN_STR(IF, "IF");
+		RETURN_STR(ELSE, "ELSE");
+		RETURN_STR(RETURN, "RETURN");
+		RETURN_STR(EQ, "EQ");
+		RETURN_STR(NOT_EQ, "NOT_EQ");
+	}
+}
 
 int init_keyword_entry(const char* word, token_type t, struct keyword_entry* entry)
 {

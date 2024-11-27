@@ -29,7 +29,7 @@ typedef enum {
 	RETURN,
 	EQ,
 	NOT_EQ
-} token_type; 
+} token_type;
 
 struct token {
 	token_type type;
@@ -44,5 +44,6 @@ void token_destroy(struct token *t);
 int init_keywords(void);
 void free_keywords(void);
 token_type lookup_indent(char* indentifier);
+char* token_type_to_str(token_type tt);
 
 #endif // !TOKEN_H

@@ -4,6 +4,8 @@
 #include <sys/types.h>
 
 #include "parser.h"
+#include "token.h"
+#include "ast.h"
 #include "lexer.h"
 #include "list.h"
 #include "token.h"
@@ -70,6 +72,25 @@ int peak_token_is(token_type tt)
 	return tt == p->peek_tok->type;
 }
 
+int peek_error(token_type t)
+{
+	char buf[512];
+	snprintf(buf, 512, "expected next token to be %s, got %s instead", token_type_to_str(t), token_type_to_str(p->peek_tok->type));
+	size_t buf_len = strlen(buf);
+	struct error *err = gc_malloc(sizeof(*err));
+	if (!err)
+		return -1;
+
+	err->error_msg = gc_malloc(buf_len);
+	if (!err)
+		return -1;
+
+	INIT_LIST_HEAD(&err->next);
+	memcpy(err->error_msg, buf, buf_len);
+	list_add(&err->next, &prg->error_list);
+	return 0;
+}
+
 int expect_peek(token_type tt)
 {
 	if (peak_token_is(tt)) {
@@ -77,6 +98,8 @@ int expect_peek(token_type tt)
 			return -1;
 		return 1;
 	}
+	if (peek_error(tt))
+		return -1;
 	return 0;
 }
 
@@ -129,6 +152,7 @@ int parse_program(void)
 		return -1;
 
 	INIT_LIST_HEAD(&prg->statement_list);
+	INIT_LIST_HEAD(&prg->error_list);
 
 	while (p->cur_tok->type != MEOF) {
 		switch (p->cur_tok->type) {

@@ -1,3 +1,4 @@
+#include "ast.h"
 #include "debug.h"
 #include "list.h"
 #include "parser.h"
@@ -32,6 +33,9 @@ int test_let_statement(void)
 		return -1;
 
 	if (!prg)
+		return -1;
+
+	if (!list_empty(&prg->error_list))
 		return -1;
 
 	list_for_each_entry(let, &prg->statement_list, statement) {
