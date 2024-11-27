@@ -1,4 +1,6 @@
 #include "debug.h"
+#include "list.h"
+#include "parser.h"
 #include "token.h"
 #include "lexer.h"
 #include <stdlib.h>
@@ -6,12 +8,37 @@
 #include <assert.h>
 #include <stdio.h>
 
-int test_let_statements(void)
+int test_let_statement(void)
 {
-	// I will write the test later
+	struct let_statement *let;
+	int i = 0;
 	const char *input = "let x = 5;\n"
 	"let y = 10;\n"
 	"let foobar = 838383;";
+
+	const char *expected_ident[] = {
+		"x",
+		"y",
+		"foobar",
+	};
+
+	if (lexer_init(input))
+		return -1;
+
+	if (new_parser())
+		return -1;
+
+	if (parse_program())
+		return -1;
+
+	if (!prg)
+		return -1;
+
+	list_for_each_entry(let, &prg->statement_list, statement) {
+		assert(strncmp(let->ident->value, expected_ident[i], strlen(expected_ident[i])) == 0);
+		i++;
+	}
+
 	return 0;
 }
 
@@ -175,11 +202,16 @@ int test_lexer_complex(void)
 int main(void)
 {
 	if (init_keywords())
-		return -1;
-	if (test_lexer_complex())
-		return -1;
+		return 1;
+
 	if (test_lexer_simple())
-		return -1;
+		return 1;
+
+	if (test_lexer_complex())
+		return 1;
+
+	if (test_let_statement())
+		return 1;
 
 	free_keywords();
 	return 0;
