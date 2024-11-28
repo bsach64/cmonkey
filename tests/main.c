@@ -1,5 +1,6 @@
 #include "ast.h"
-#include "debug.h"
+#include "compiler.h"
+#include "gc.h"
 #include "list.h"
 #include "parser.h"
 #include "token.h"
@@ -28,12 +29,27 @@ int test_return_statement(void)
 	if (!prg)
 		return -1;
 
-	if (!list_empty(&prg->error_list))
+	if (!list_empty(&prg->error_list)) {
+		error_list_destroy(prg);
 		return -1;
+	}
 
 	list_for_each_entry(ret, &prg->statement_list, statement) {
 		assert(strncmp(ret->token->literal, "return", strlen("return")) == 0);
 	}
+
+	struct list_head *head = &prg->statement_list;
+	struct list_head *last = prg->statement_list.prev;
+
+	while (last != head) {
+		ret = container_of(last, struct return_statement, statement);
+		last = last->prev;
+		return_statement_destroy(ret);
+	}
+
+	parser_destroy();
+	lexer_destroy();
+	program_destroy(prg);
 
 	return 0;
 }
@@ -64,13 +80,28 @@ int test_let_statement(void)
 	if (!prg)
 		return -1;
 
-	if (!list_empty(&prg->error_list))
+	if (!list_empty(&prg->error_list)) {
+		error_list_destroy(prg);
 		return -1;
+	}
 
 	list_for_each_entry(let, &prg->statement_list, statement) {
 		assert(strncmp(let->ident->value, expected_ident[i], strlen(expected_ident[i])) == 0);
 		i++;
 	}
+
+	struct list_head *head = &prg->statement_list;
+	struct list_head *last = prg->statement_list.prev;
+
+	while (last != head) {
+		let = container_of(last, struct let_statement, statement);
+		last = last->prev;
+		let_statement_destroy(let);
+	}
+
+	parser_destroy();
+	lexer_destroy();
+	program_destroy(prg);
 
 	return 0;
 }
@@ -223,7 +254,6 @@ int test_lexer_complex(void)
 	for (size_t i = 0; i < length; i++) {
 		if (lexer_next_token())
 			return -1;
-		print_token();
 		assert(tok->type == tests[i].expected_type);
 		assert(strncmp(tok->literal, tests[i].expected_literal, strlen(tok->literal)) == 0);
 		token_destroy(tok);
