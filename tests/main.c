@@ -9,6 +9,35 @@
 #include <assert.h>
 #include <stdio.h>
 
+int test_return_statement(void)
+{
+	struct return_statement *ret;
+	const char *input = "return 5;\n"
+	"return 10;\n"
+	"return 838383;";
+
+	if (lexer_init(input))
+		return -1;
+
+	if (new_parser())
+		return -1;
+
+	if (parse_program())
+		return -1;
+
+	if (!prg)
+		return -1;
+
+	if (!list_empty(&prg->error_list))
+		return -1;
+
+	list_for_each_entry(ret, &prg->statement_list, statement) {
+		assert(strncmp(ret->token->literal, "return", strlen("return")) == 0);
+	}
+
+	return 0;
+}
+
 int test_let_statement(void)
 {
 	struct let_statement *let;
@@ -215,6 +244,9 @@ int main(void)
 		return 1;
 
 	if (test_let_statement())
+		return 1;
+
+	if (test_return_statement())
 		return 1;
 
 	free_keywords();
