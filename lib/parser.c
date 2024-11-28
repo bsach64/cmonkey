@@ -103,6 +103,31 @@ int expect_peek(token_type tt)
 	return 0;
 }
 
+int parse_return_statement(void)
+{
+	struct return_statement *ret = gc_malloc(sizeof(*ret));
+	if (!ret)
+		return -1;
+
+	ret->token = copy_tok();
+	if (!ret->token)
+		return -1;
+
+	if (next_token())
+		return -1;
+
+	/*
+	TODO: We're skipping the expressions until we
+	encounter a semicolon
+	*/
+
+	while (!cur_token_is(SEMICOLON)) {
+		if (next_token())
+			return -1;
+	}
+	return 0;
+}
+
 int parse_let_statement(void)
 {
 	struct let_statement *let = gc_malloc(sizeof(*let));
@@ -160,6 +185,9 @@ int parse_program(void)
 			if (parse_let_statement())
 				return -1;
 			break;
+		case RETURN:
+			if (parse_return_statement())
+				return -1;
 		default:
 			break;
 		}

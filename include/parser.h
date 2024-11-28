@@ -20,6 +20,11 @@ struct let_statement {
 	struct list_head statement;
 };
 
+struct return_statement {
+	struct token *token;
+	struct list_head statement;
+};
+
 extern int new_parser(void);
 extern int parse_program(void);
 
