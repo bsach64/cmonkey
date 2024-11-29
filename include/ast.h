@@ -18,21 +18,26 @@ struct indentifier {
 	char *value;
 };
 
-struct let_statement {
-	struct token *token;
-	struct indentifier *ident;
-	struct list_head statement;
+enum statement_type {
+	SLET,
+	SRETURN,
+	SEXPRESSION
 };
 
-struct return_statement {
+struct statement {
 	struct token *token;
 	struct list_head statement;
+	enum statement_type type;
+	void *additional;
+};
+
+struct let_statement {
+	struct indentifier *ident;
 };
 
 extern void error_destroy(struct error *err);
 extern void error_list_destroy(struct program *prg);
 extern void program_destroy(struct program *prg);
-extern void let_statement_destroy(struct let_statement *let);
-extern void return_statement_destroy(struct return_statement *ret);
+extern void statement_destroy(struct statement *stmt);
 
 #endif

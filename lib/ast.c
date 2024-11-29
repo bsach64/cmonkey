@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 
 #include "ast.h"
@@ -39,21 +40,17 @@ void error_destroy(struct error *err)
 	gc_free(err);
 }
 
-void let_statement_destroy(struct let_statement *let)
+void statement_destroy(struct statement *stmt)
 {
-	let->statement.prev = NULL;
-	let->statement.next = NULL;
-	token_destroy(let->token);
-	token_destroy(let->ident->token);
-	gc_free(let->ident->value);
-	gc_free(let->ident);
-	gc_free(let);
-}
-
-void return_statement_destroy(struct return_statement *ret)
-{
-	ret->statement.prev = NULL;
-	ret->statement.next = NULL;
-	token_destroy(ret->token);
-	gc_free(ret);
+	stmt->statement.prev = NULL;
+	stmt->statement.next = NULL;
+	token_destroy(stmt->token);
+	if (stmt->type == SLET) {
+		struct let_statement *let = (struct let_statement *)stmt->additional;
+		token_destroy(let->ident->token);
+		gc_free(let->ident->value);
+		gc_free(let->ident);
+		gc_free(let);
+	}
+	gc_free(stmt);
 }

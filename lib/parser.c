@@ -103,14 +103,26 @@ int expect_peek(token_type tt)
 	return 0;
 }
 
+/* Does not allocate memory according to statement_type so void *additional -> NULL */
+struct statement *new_statement(enum statement_type st)
+{
+	struct statement *stmt = gc_malloc(sizeof(*stmt));
+	if (!stmt)
+		return NULL;
+
+	stmt->token = copy_tok();
+	if (!stmt->token)
+		return NULL;
+
+	stmt->type = st;
+	stmt->additional = NULL;
+	return stmt;
+}
+
 int parse_return_statement(void)
 {
-	struct return_statement *ret = gc_malloc(sizeof(*ret));
+	struct statement *ret = new_statement(SRETURN);
 	if (!ret)
-		return -1;
-
-	ret->token = copy_tok();
-	if (!ret->token)
 		return -1;
 
 	if (next_token())
@@ -132,17 +144,15 @@ int parse_return_statement(void)
 
 int parse_let_statement(void)
 {
-	struct let_statement *let = gc_malloc(sizeof(*let));
-	if (!let)
-		return -1;
-
-	let->token = copy_tok();
-	if (!let->token)
+	struct statement *stmt = new_statement(SLET);
+	if (!stmt)
 		return -1;
 
 	int ret = expect_peek(IDENT);
 	if (ret <= 0)
 		return ret;
+
+	struct let_statement *let = gc_malloc(sizeof(*let));
 	
 	let->ident = gc_malloc(sizeof(*let->ident));
 	if (!let->ident)
@@ -168,7 +178,8 @@ int parse_let_statement(void)
 			return -1;
 	}
 
-	list_add_tail(&let->statement, &prg->statement_list);
+	stmt->additional = (void *)let;
+	list_add_tail(&stmt->statement, &prg->statement_list);
 	return 0;
 }
 
