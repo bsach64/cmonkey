@@ -35,6 +35,20 @@ struct let_statement {
 	struct indentifier *ident;
 };
 
+/* no additional fields required for return_statement, hence no struct */
+
+/* for now */
+
+enum expression_type {
+	EINDENTIFIER
+};
+
+struct expression {
+	struct token *token;
+	enum expression_type type;
+	void *additional;
+};
+
 extern void error_destroy(struct error *err);
 extern void error_list_destroy(struct program *prg);
 extern void program_destroy(struct program *prg);

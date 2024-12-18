@@ -10,6 +10,10 @@
 #include <assert.h>
 #include <stdio.h>
 
+/* EXPRESSION TESTS */
+
+
+/* PARSER TESTS */
 int test_return_statement(void)
 {
 	struct statement *ret;
@@ -107,6 +111,7 @@ int test_let_statement(void)
 	return 0;
 }
 
+/* LEXER TESTS */
 int test_lexer_simple(void)
 {
 	const char* input = "=+(){},;";
@@ -277,8 +282,8 @@ int main(void)
 	if (test_let_statement())
 		return 1;
 
-	// if (test_return_statement())
-	// 	return 1;
+	if (test_return_statement())
+		return 1;
 
 	free_keywords();
 	return 0;

@@ -14,6 +14,50 @@
 struct parser *p;
 struct program *prg;
 
+#define PARSE_FN_TABLE_SIZE 16
+static struct hlist_head prefix_parse_fn_table[PARSE_FN_TABLE_SIZE];
+static struct hlist_head infix_parse_fn_table[PARSE_FN_TABLE_SIZE];
+
+struct prefix_parse_fn {
+	struct hlist_node table;
+	token_type tt;
+	struct expression *(*prefix_parse_fn) (void);
+};
+
+struct infix_parse_fn {
+	struct hlist_node table;
+	token_type tt;
+	struct expression *(*infix_parse_fn) (struct expression *);
+};
+
+static struct prefix_parse_fn *lookup_prefix_parse_fn(token_type tt)
+{
+	struct hlist_head *chain;
+	struct prefix_parse_fn *prefix;
+
+	chain = &prefix_parse_fn_table[tt % PARSE_FN_TABLE_SIZE];
+	hlist_for_each_entry(prefix, chain, table) {
+		if (prefix->tt == tt) {
+			return prefix;
+		}
+	}
+	return NULL;
+}
+
+static struct infix_parse_fn *lookup_infix_parse_fn(token_type tt)
+{
+	struct hlist_head *chain;
+	struct infix_parse_fn *infix;
+
+	chain = &infix_parse_fn_table[tt % PARSE_FN_TABLE_SIZE];
+	hlist_for_each_entry(infix, chain, table) {
+		if (infix->tt == tt) {
+			return infix;
+		}
+	}
+	return NULL;
+}
+
 static struct token *copy_tok(void)
 {
 	size_t len = strlen(p->cur_tok->literal) + 1;
@@ -44,8 +88,55 @@ int next_token(void)
 	return 0;
 }
 
+static struct expression *new_expression(enum expression_type et)
+{
+	struct expression *exp = gc_malloc(sizeof(*exp));
+	if (!exp)
+		return NULL;
+
+	exp->token = copy_tok();
+	if (!exp->token) {
+		gc_free(exp);
+		return NULL;
+	}
+
+	exp->type = et;
+	exp->additional = NULL;
+	return exp;
+}
+
+static struct expression *parse_identifier(void)
+{
+	struct expression *eident = new_expression(EINDENTIFIER);
+	if (!eident)
+		return NULL;
+
+	struct indentifier *ident = gc_malloc(sizeof(*ident));
+	if (!ident)
+		return NULL;
+
+	size_t ident_len = strlen(eident->token->literal) + 1;
+	ident->value = gc_malloc(ident_len);
+	if (!ident)
+		return NULL;
+
+	memcpy(ident->value, eident->token->literal, ident_len);
+
+	ident->token = copy_tok();
+	if (!ident->token)
+		return NULL;
+
+	eident->additional = (void *)ident;
+	return eident;
+}
+
 int new_parser(void)
 {
+	for (int i = 0; i < PARSE_FN_TABLE_SIZE; i++) {
+		INIT_HLIST_HEAD(&prefix_parse_fn_table[i]);
+		INIT_HLIST_HEAD(&infix_parse_fn_table[i]);
+	}
+
 	p = gc_malloc(sizeof(*p));
 	if (!p)
 		return -1;
@@ -67,7 +158,7 @@ int cur_token_is(token_type tt)
 	return tt == p->cur_tok->type;
 }
 
-int peak_token_is(token_type tt)
+int peek_token_is(token_type tt)
 {
 	return tt == p->peek_tok->type;
 }
@@ -93,7 +184,7 @@ int peek_error(token_type t)
 
 int expect_peek(token_type tt)
 {
-	if (peak_token_is(tt)) {
+	if (peek_token_is(tt)) {
 		if (next_token())
 			return -1;
 		return 1;
@@ -183,6 +274,39 @@ int parse_let_statement(void)
 	return 0;
 }
 
+enum expression_types {
+	LOWEST,
+	EQUALS,
+	LESSGREATER,
+	SUM,
+	PRODUCT,
+	PREFIX,
+	CALL
+};
+
+struct expression *parse_expression(int precedence)
+{
+	struct prefix_parse_fn *prefix = lookup_prefix_parse_fn(p->cur_tok->type);
+	if (!prefix)
+		return NULL;
+
+	return prefix->prefix_parse_fn();
+}
+
+int parse_expression_statement(void)
+{
+	struct statement *exp = new_statement(SEXPRESSION);
+	if (!exp)
+		return -1;
+
+	if (peek_token_is(SEMICOLON)) {
+		if (next_token())
+			return -1;
+	}
+
+	return 0;
+}
+
 int parse_program(void)
 {
 	prg = gc_malloc(sizeof(*prg));
@@ -201,7 +325,10 @@ int parse_program(void)
 		case RETURN:
 			if (parse_return_statement())
 				return -1;
+			break;
 		default:
+			if (parse_expression_statement())
+				return -1;
 			break;
 		}
 
